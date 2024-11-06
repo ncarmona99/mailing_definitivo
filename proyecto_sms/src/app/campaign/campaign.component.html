@@ -1,0 +1,26 @@
+<div class="campaign-container">
+    <h2>Enviar Campaña</h2>
+    <form (ngSubmit)="sendCampaign()">
+      <div>
+        <label>Mensaje:</label>
+        <textarea [(ngModel)]="campaignData.message" name="message" required></textarea>
+      </div>
+      <div>
+        <label>Destinatarios (separados por comas):</label>
+        <input [(ngModel)]="campaignData.recipients" name="recipients" placeholder="email1@example.com, email2@example.com" required />
+      </div>
+      <button type="submit">Enviar Campaña</button>
+    </form>
+  
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+  
+    <div *ngIf="analytics">
+      <h3>Estadísticas de la Campaña</h3>
+      <p>Enviados: {{ analytics.sent }}</p>
+      <p>No Enviados: {{ analytics.notSent }}</p>
+      <p>Rebotes: {{ analytics.bounced }}</p>
+      <p>Errores: {{ analytics.errors }}</p>
+    </div>
+  </div>
