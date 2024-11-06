@@ -1,26 +1,78 @@
-<div class="campaign-container">
-    <h2>Enviar Campaña</h2>
-    <form (ngSubmit)="sendCampaign()">
-      <div>
-        <label>Mensaje:</label>
-        <textarea [(ngModel)]="campaignData.message" name="message" required></textarea>
-      </div>
-      <div>
-        <label>Destinatarios (separados por comas):</label>
-        <input [(ngModel)]="campaignData.recipients" name="recipients" placeholder="email1@example.com, email2@example.com" required />
-      </div>
-      <button type="submit">Enviar Campaña</button>
-    </form>
-  
-    <div *ngIf="errorMessage" class="error-message">
-      {{ errorMessage }}
+<div class="container mt-4">
+  <h2>Enviar Campaña</h2>
+  <form (ngSubmit)="sendCampaign()">
+    <div class="mb-3">
+      <label for="messageType" class="form-label">Tipo de Mensaje</label>
+      <select id="messageType" [(ngModel)]="campaignData.type" name="type" class="form-select" required>
+        <option value="email">Correo Electrónico</option>
+        <option value="sms">Mensaje de Texto (SMS)</option>
+      </select>
     </div>
-  
-    <div *ngIf="analytics">
-      <h3>Estadísticas de la Campaña</h3>
-      <p>Enviados: {{ analytics.sent }}</p>
-      <p>No Enviados: {{ analytics.notSent }}</p>
-      <p>Rebotes: {{ analytics.bounced }}</p>
-      <p>Errores: {{ analytics.errors }}</p>
+    <div class="mb-3">
+      <label for="recipients" class="form-label">Destinatarios</label>
+      <input
+        type="text"
+        id="recipients"
+        [(ngModel)]="campaignData.recipients"
+        name="recipients"
+        placeholder="ejemplo@mail.com, +123456789"
+        class="form-control"
+        required
+      />
+      <div class="form-text">Separa los destinatarios con comas.</div>
     </div>
+    <div class="mb-3">
+      <label for="message" class="form-label">Mensaje</label>
+      <textarea
+        id="message"
+        [(ngModel)]="campaignData.message"
+        name="message"
+        rows="3"
+        class="form-control"
+        required
+      ></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar Campaña</button>
+  </form>
+
+  <!-- Mensaje de éxito -->
+  <div *ngIf="!errorMessage && analytics" class="alert alert-success mt-3">
+    Campaña enviada con éxito.
   </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Tabla de estadísticas de la campaña -->
+  <div *ngIf="analytics" class="mt-5">
+    <h3>Estadísticas de la Campaña</h3>
+    <table class="table table-bordered mt-3">
+      <thead>
+        <tr>
+          <th>Enviados</th>
+          <th>No Enviados</th>
+          <th>Rebotados</th>
+          <th>Errores</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ analytics.sent }}</td>
+          <td>{{ analytics.notSent }}</td>
+          <td>{{ analytics.bounced }}</td>
+          <td>{{ analytics.errors }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Lista de "No Molestar" -->
+  <div *ngIf="noDisturbList.length" class="mt-5">
+    <h3>Lista de "No Molestar"</h3>
+    <ul class="list-group">
+      <li class="list-group-item" *ngFor="let email of noDisturbList">{{ email }}</li>
+    </ul>
+  </div>
+</div>

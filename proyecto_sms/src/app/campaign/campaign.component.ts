@@ -14,6 +14,7 @@ import { HttpClientModule } from '@angular/common/http';
 })
 export class CampaignComponent implements OnInit {
   campaignData = {
+    type: 'email',  // Tipo predeterminado
     message: '',
     recipients: ''
   };
@@ -39,6 +40,7 @@ export class CampaignComponent implements OnInit {
     const recipientsList = this.campaignData.recipients.split(',').map(email => email.trim());
 
     const campaignPayload = {
+      type: this.campaignData.type,
       message: this.campaignData.message,
       recipients: recipientsList
     };

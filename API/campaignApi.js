@@ -1,9 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const moment = require('moment'); // Para gestionar horarios
-const nodemailer = require('nodemailer'); // Para envío de correos (opcional)
+const nodemailer = require('nodemailer');
 const app = express();
 const cors = require('cors');
+const twilio = require('twilio');
+const client = twilio('AC1e3a9d02d9010addd1719f59f46198ef', '78aae51b59ea0ea4446e8a599315a889');
 
 app.use(cors({
   origin: 'http://localhost:4200' // Permitir solo este origen
@@ -31,48 +32,38 @@ const sendEmail = (recipient, message) => {
 
 // Base de datos simulada
 let campaigns = [];
-let noDisturbList = ["user1@example.com", "user2@example.com"]; // Lista de "no molestar"
+let noDisturbList = ["n.carmona@duocuc.cl", "sole.rioseco.o@gmail.com"]; // Lista de "no molestar"
 let analytics = { sent: 0, notSent: 0, bounced: 0, errors: 0 };
 
 app.use(bodyParser.json());
 
 // Ruta para enviar una campaña
 app.post('/campaign/send', (req, res) => {
-  const { message, recipients } = req.body;
+  const { type, message, recipients } = req.body;
 
-  // Filtrar la lista de "no molestar"
   const validRecipients = recipients.filter(recipient => !noDisturbList.includes(recipient));
   if (validRecipients.length === 0) {
     return res.status(400).json({ error: 'No hay destinatarios válidos para enviar' });
   }
 
-  // Simulación de envío de campaña
-  const campaignId = `${Date.now()}`;
-  campaigns.push({ campaignId, message, recipients: validRecipients });
+  const sendFunction = type === 'sms' ? sendSms : sendEmail;
 
-  // Enviar correos a los destinatarios válidos de inmediato
-  Promise.all(validRecipients.map(recipient => sendEmail(recipient, message)))
+  Promise.all(validRecipients.map(recipient => sendFunction(recipient, message)))
     .then(() => {
-      // Actualizar analíticas
       analytics.sent += validRecipients.length;
-      analytics.notSent += recipients.length - validRecipients.length;
-
-      // Responder con éxito y analíticas
       res.json({
         success: true,
-        campaignId,
         sent: analytics.sent,
-        notSent: analytics.notSent,
+        notSent: recipients.length - validRecipients.length,
         bounced: analytics.bounced,
         errors: analytics.errors
       });
     })
     .catch(error => {
-      console.error('Error al enviar los correos:', error);
-      res.status(500).json({ error: 'Hubo un error al enviar los correos.' });
+      console.error('Error al enviar los mensajes:', error);
+      res.status(500).json({ error: 'Hubo un error al enviar los mensajes.' });
     });
 });
-
 // Ruta para obtener analíticas de una campaña específica
 app.get('/campaign/analytics/:campaignId', (req, res) => {
   const { campaignId } = req.params;
@@ -95,6 +86,14 @@ app.get('/campaign/analytics/:campaignId', (req, res) => {
 app.get('/campaign/no-disturb-list', (req, res) => {
   res.json(noDisturbList);
 });
+
+const sendSms = (recipient, message) => {
+  return client.messages.create({
+    body: message,
+    from: '+12513339524',
+    to: recipient
+  });
+};
 
 // Iniciar el servidor
 const PORT = 3000;
