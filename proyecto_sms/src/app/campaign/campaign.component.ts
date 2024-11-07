@@ -14,9 +14,9 @@ import { HttpClientModule } from '@angular/common/http';
 })
 export class CampaignComponent implements OnInit {
   campaignData = {
-    type: 'email',  // Tipo predeterminado
     message: '',
-    recipients: ''
+    recipients: '',
+    type: 'email'
   };
   analytics: any = null;
   noDisturbList: string[] = [];
@@ -36,32 +36,40 @@ export class CampaignComponent implements OnInit {
   }
 
   sendCampaign() {
-    // Convertir destinatarios a una lista de emails
     const recipientsList = this.campaignData.recipients.split(',').map(email => email.trim());
-
     const campaignPayload = {
-      type: this.campaignData.type,
       message: this.campaignData.message,
       recipients: recipientsList
     };
 
-    this.campaignService.sendCampaign(campaignPayload).subscribe(
-      response => {
-        if (response.success) {
-          alert('Campaña enviada con éxito');
-          this.analytics = {
-            sent: response.sent || 0,
-            notSent: response.notSent || 0,
-            bounced: response.bounced || 0,
-            errors: response.errors || 0
-          };
-        }
-        this.errorMessage = null;
-      },
-      error => {
-        console.error('Error al enviar la campaña:', error);
-        this.errorMessage = 'Hubo un error al enviar la campaña.';
-      }
-    );
+    if (this.campaignData.type === 'email') {
+      this.campaignService.sendEmailCampaign(campaignPayload).subscribe(
+        response => this.handleResponse(response),
+        error => this.handleError(error)
+      );
+    } else if (this.campaignData.type === 'sms') {
+      this.campaignService.sendSmsCampaign(campaignPayload).subscribe(
+        response => this.handleResponse(response),
+        error => this.handleError(error)
+      );
+    }
+  }
+
+  private handleResponse(response: any) {
+    if (response.success) {
+      alert('Campaña enviada con éxito');
+      this.analytics = {
+        sent: response.sent || 0,
+        notSent: response.notSent || 0,
+        bounced: response.bounced || 0,
+        errors: response.errors || 0
+      };
+    }
+    this.errorMessage = null;
+  }
+
+  private handleError(error: any) {
+    console.error('Error al enviar la campaña:', error);
+    this.errorMessage = 'Hubo un error al enviar la campaña.';
   }
 }

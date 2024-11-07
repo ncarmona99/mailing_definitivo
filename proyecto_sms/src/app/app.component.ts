@@ -5,9 +5,8 @@ import { CampaignComponent } from './campaign/campaign.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet,CampaignComponent],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  imports: [RouterOutlet, CampaignComponent],
+  template: '<router-outlet></router-outlet>',
 })
 export class AppComponent {
   title = 'proyecto_sms';

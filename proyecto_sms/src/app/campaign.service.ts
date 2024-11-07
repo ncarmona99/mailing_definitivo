@@ -6,19 +6,24 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class CampaignService {
-  private apiUrl = 'http://localhost:3000/campaign'; // URL de la API de Node.js
+  private emailApiUrl = 'http://localhost:3002'; // Cambia al puerto de tu API de correos
+  private smsApiUrl = 'http://localhost:3000';   // Cambia al puerto de tu API de Twilio SMS
+  private noDisturbApiUrl = 'http://localhost:3001'; // Cambia al puerto de tu API de "no molestar"
 
   constructor(private http: HttpClient) {}
 
-  sendCampaign(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/send`, data); // Endpoint para enviar campañas
+  // Enviar campaña de correo
+  sendEmailCampaign(payload: { message: string, recipients: string[] }): Observable<any> {
+    return this.http.post(`${this.emailApiUrl}/send-email`, payload);
   }
 
-  getAnalytics(campaignId: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/analytics/${campaignId}`); // Endpoint para obtener analíticas
+  // Enviar campaña de SMS
+  sendSmsCampaign(payload: { message: string, recipients: string[] }): Observable<any> {
+    return this.http.post(`${this.smsApiUrl}/send-sms`, payload);
   }
 
-  getNoDisturbList(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/no-disturb-list`); // Endpoint para la lista de "no molestar"
+  // Obtener la lista de "no molestar"
+  getNoDisturbList(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.noDisturbApiUrl}/no-disturb-list`);
   }
 }
